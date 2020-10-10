@@ -1,5 +1,6 @@
 CC = gcc
 EXEC = ancestor hamming_distance my_ancestor
+OUTPUT = *.out.*
 FLAG = -Wall -g
 
 all: $(EXEC)
@@ -14,4 +15,4 @@ hamming_distance: hamming_distance.c
 	$(CC) $^ -o $@ $(FLAG)
 
 clean: $(EXEC)
-	rm -f $(EXEC)
+	rm -f $(EXEC) $(OUTPUT)
