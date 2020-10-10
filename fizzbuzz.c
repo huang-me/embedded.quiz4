@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define MSG_LEN 8
 
@@ -44,9 +45,22 @@ void bitwise(int in)
 }
 
 int main(int argc, char *argv[]) {
+    FILE *naive_time, *bitwise_time;
+    naive_time = fopen("naive.txt", "w");
+    bitwise_time = fopen("bitwise.txt", "w");
+
+    time_t start, end;
     for (size_t i = 1; i <= 100; i++) {
-        naive(i);
-        bitwise(i);
+        start = clock();
+        for (int j = 0; j < 100; j++)
+            naive(i);
+        end = clock();
+        fprintf(naive_time, "%f\n", (double) (end - start) / CLOCKS_PER_SEC);
+        start = clock();
+        for (int j = 0; j < 100; j++)
+            bitwise(i);
+        end = clock();
+        fprintf(bitwise_time, "%f\n", (double) (end - start) / CLOCKS_PER_SEC);
     }
 
     return 0;
