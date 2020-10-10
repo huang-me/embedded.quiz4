@@ -3,57 +3,55 @@
 
 typedef struct {
     int **parent;
-    int *num_parents;
+    int max_level, n;
 } TreeAncestor;
 
 TreeAncestor *treeAncestorCreate(int n, int *parent, int parentSize)
 {
     TreeAncestor *obj = malloc(sizeof(TreeAncestor));
     obj->parent = malloc(n * sizeof(int *));
-    obj->num_parents = malloc(n * sizeof(int));
 
+    int max_level = 32 - __builtin_clz(n);
     for (int i = 0; i < n; i++) {
-        if (i == 0)
-            obj->parent[i] = malloc(sizeof(int));
-        else
-            obj->parent[i] =
-                malloc((obj->num_parents[parent[i]] + 1) * sizeof(int));
+        obj->parent[i] = malloc(max_level * sizeof(int));
+        for (int j = 0; j < max_level; j++)
+            obj->parent[i][j] = -1;
 
         obj->parent[i][0] = parent[i];
-        if (i != 0) {
-            int j = 1;
-            for (j = 1; j < obj->num_parents[parent[i]]; j++) {
-                obj->parent[i][j] = obj->parent[parent[i]][j - 1];
-            }
-            obj->parent[i][j] = -1;
-            obj->num_parents[i] = obj->num_parents[parent[i]] + 1;
-        } else
-            obj->num_parents[i] = 1;
     }
 
-    // for (int i = 0; i < n; i++) {
-    //    for (int j = 0; j < obj->num_parents[i]; j++) {
-    //        printf("%d\t", obj->parent[i][j]);
-    //    }
-    //    printf("\n");
-    //}
+    for (int j = 1; j < max_level; j++) {
+        int quit = 1;
+        for (int i = 0; i < parentSize; i++) {
+            if (obj->parent[i][j - 1] != -1)
+                obj->parent[i][j] = obj->parent[obj->parent[i][j - 1]][j - 1];
+
+            if (obj->parent[i][j] != -1)
+                quit = 0;
+        }
+        if (quit)
+            break;
+    }
+    obj->max_level = max_level;
+    obj->n = n;
 
     return obj;
 }
 
 int treeAncestorGetKthAncestor(TreeAncestor *obj, int node, int k)
 {
-    if (k >= obj->num_parents[node])
-        return -1;
-    return obj->parent[node][k - 1];
+    int max_level = obj->max_level;
+    for (int i = 0; i < max_level && node != -1; ++i)
+        if (k & (1 << i))
+            node = obj->parent[node][i];
+    return node;
 }
 
 void treeAncestorFree(TreeAncestor *obj)
 {
-    for (int i = 0; i < obj->num_parents[i]; i++)
+    for (int i = 0; i < obj->n; i++)
         free(obj->parent[i]);
     free(obj->parent);
-    free(obj->num_parents);
     free(obj);
 }
 
